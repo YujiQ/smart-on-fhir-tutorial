@@ -32,8 +32,20 @@
           var lname = '';
 
           if (typeof patient.name[0] !== 'undefined') {
-            fname = patient.name[0].given.join(' ');
-            lname = patient.name[0].family.join(' ');
+            // Handle given name (array in all FHIR versions)
+            fname = patient.name[0].given ? patient.name[0].given.join(' ') : '';
+            
+            // Handle family name (array in DSTU2/STU3, string in R4)
+            var familyName = patient.name[0].family;
+            if (Array.isArray(familyName)) {
+              // FHIR DSTU2/STU3: family is an array
+              lname = familyName.join(' ');
+            } else if (typeof familyName === 'string') {
+              // FHIR R4: family is a string
+              lname = familyName;
+            } else {
+              lname = '';
+            }
           }
 
           var height = byCodes('8302-2');
